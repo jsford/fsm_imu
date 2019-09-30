@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+
+    <node pkg="fsm_imu" name="fsm_imu" type="fsm_imu_node" output="screen"/>
+
+</launch>
