@@ -158,18 +158,23 @@ int main(int argc, char** argv) {
 
     message.messageType = FREESPACE_MESSAGE_DATAMODECONTROLV2REQUEST;
     message.dataModeControlV2Request.packetSelect = 8;  // MotionEngine Outout
-    message.dataModeControlV2Request.mode = 0;          // Set full motion
-    message.dataModeControlV2Request.formatSelect = 0;  // MEOut format 0
+    message.dataModeControlV2Request.mode = 4;          // Set full motion on
+    message.dataModeControlV2Request.formatSelect = 1;  // MEOut format 0
     message.dataModeControlV2Request.ff0 = 1;           // Pointer fields
+    message.dataModeControlV2Request.ff1 = 1;           // Pointer fields
+    message.dataModeControlV2Request.ff2 = 1;           // Pointer fields
     message.dataModeControlV2Request.ff3 = 1;           // Angular velocity fields
+    message.dataModeControlV2Request.ff4 = 1;           // Angular velocity fields
+    message.dataModeControlV2Request.ff5 = 1;           // Angular velocity fields
+    message.dataModeControlV2Request.ff6 = 1;           // Angular velocity fields
+    message.dataModeControlV2Request.ff7 = 1;           // ActClass/PowerMgmt
 
     rc = freespace_sendMessage(device, &message);
     if (rc != FREESPACE_SUCCESS) {
         printf("Could not send message: %d.\n", rc);
     }
 
-    // A loop to read messages
-    printf("Listening for messages.\n");
+    // Loop to read messages
     while (ros::ok()) {
         rc = freespace_readMessage(device, &message, 100);
         if (rc == FREESPACE_ERROR_TIMEOUT ||
@@ -187,10 +192,49 @@ int main(int argc, char** argv) {
         }
 
         if (message.messageType == FREESPACE_MESSAGE_MOTIONENGINEOUTPUT) {
-            struct MultiAxisSensor angVel;
+            struct MultiAxisSensor accel, accelNoGrav, actClass, angPos, angVel,
+                                   compass, inclination, mag, temp;
+
+            // Extract Acceleration
+            rc = freespace_util_getAcceleration(&message.motionEngineOutput, &accel);
+            if (rc == 0) {
+                printf ("Accel: X: % 6.2f, Y: % 6.2f, Z: % 6.2f\n", accel.x, accel.y, accel.z);
+            }
+            // Extract AccelerationNoGravity
+            rc = freespace_util_getAcceleration(&message.motionEngineOutput, &accelNoGrav);
+            if (rc == 0) {
+                printf ("AccelNoGrav: X: % 6.2f, Y: % 6.2f, Z: % 6.2f\n", accelNoGrav.x, accelNoGrav.y, accelNoGrav.z);
+            }
+            // Extract ActionClass
+            rc = freespace_util_getActClass(&message.motionEngineOutput, &actClass);
+            if (rc == 0) {
+                printf ("ActionClassFlags: % 6.2f, PowerMgmtFlags: % 6.2f\n", actClass.x, actClass.y);
+                // Note(Jordan): actClass.x == 1 (STABLE), actClass.x == 2 (MOSTLY STABLE), actClass.y == 4 (MOVING)
+            }
+            // Extract AngularVelocity
             rc = freespace_util_getAngularVelocity(&message.motionEngineOutput, &angVel);
             if (rc == 0) {
-                printf ("X: % 6.2f, Y: % 6.2f, Z: % 6.2f\n", angVel.x, angVel.y, angVel.z);
+                printf ("AngVel: X: % 6.2f, Y: % 6.2f, Z: % 6.2f\n", angVel.x, angVel.y, angVel.z);
+            }
+            // Extract AngularPosition
+            rc = freespace_util_getAngPos(&message.motionEngineOutput, &angPos);
+            if (rc == 0) {
+                printf ("AngPos: X: % 6.2f, Y: % 6.2f, Z: % 6.2f\n", angPos.x, angPos.y, angPos.z);
+            }
+            // Extract Compass
+            rc = freespace_util_getCompassHeading(&message.motionEngineOutput, &compass);
+            if (rc == 0) {
+                printf ("Compass: % 6.2f\n", compass.x);
+            }
+            // Extract Inclination
+            rc = freespace_util_getInclination(&message.motionEngineOutput, &inclination);
+            if (rc == 0) {
+                printf ("Inclination: % 6.2f\n", inclination.x);
+            }
+            // Extract Magnetometer
+            rc = freespace_util_getMagnetometer(&message.motionEngineOutput, &mag);
+            if (rc == 0) {
+                printf ("Mag: X: % 6.2f, Y: % 6.2f, Z: % 6.2f\n", mag.x, mag.y, mag.z);
             }
         }
     }
