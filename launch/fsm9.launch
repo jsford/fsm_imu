@@ -1,6 +1,10 @@
 <?xml version="1.0"?>
 <launch>
 
-    <node pkg="fsm_imu" name="fsm_imu" type="fsm_imu_node" output="screen"/>
+    <node pkg="fsm_imu" name="fsm_imu" type="fsm_imu_node" output="screen">
+        <param name="period_us" value="8000" />
+        <param name="frame_id" value="/imu" />
+        <param name="topic" value="/imu/data" />
+    </node>
 
 </launch>
