@@ -25,7 +25,7 @@ int sendGetSensorPeriodMessage(FreespaceDeviceId device, int sensor) {
   memset(&message, 0, sizeof(message)); // Make sure all the message fields are initialized to 0.
 
   message.messageType = FREESPACE_MESSAGE_SENSORPERIODREQUEST;
-  message.sensorPeriodRequest.get = 1; // We are getting, not setting
+  message.sensorPeriodRequest.get = 1;         // We are getting, not setting
   message.sensorPeriodRequest.sensor = sensor; // Sensor index - see HCOMM doc for more info
 
   return freespace_sendMessage(device, &message);
@@ -38,7 +38,7 @@ int sendSetSensorPeriodMessage(FreespaceDeviceId device, int sensor, uint32_t pe
   memset(&message, 0, sizeof(message)); // Make sure all the message fields are initialized to 0.
 
   message.messageType = FREESPACE_MESSAGE_SENSORPERIODREQUEST;
-  message.sensorPeriodRequest.get = 0; // We are getting, not setting
+  message.sensorPeriodRequest.get = 0;         // We are setting, not getting
   message.sensorPeriodRequest.sensor = sensor; // Sensor index - see HCOMM doc for more info
   message.sensorPeriodRequest.period = period_us;
   message.sensorPeriodRequest.commit = 1;
@@ -133,7 +133,7 @@ int main(int argc, char **argv) {
       printf("Try adding the following udev rule to "
              "/etc/udev/rules.d/99-fsm9.rules:\n");
       printf("SUBSYSTEM==\"usb\", ATTRS{idVendor}==\"%x\", "
-             "ATTRS{idProduct}==\"%x\", MODE=:\"0666\"\n",
+             "ATTRS{idProduct}==\"%x\", MODE:=\"0666\"\n",
              info.vendor, info.product);
       printf("Then, run the following command to reload udev rules:\n");
       printf("sudo udevadm trigger\n\n\n");
